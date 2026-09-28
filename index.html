@@ -17,7 +17,7 @@
 :root{
   --ink:#131b24; --ink-2:#26313d; --ink-3:#5b6874;
   --paper:#e6eaec; --paper-2:#f2f4f5; --line:#c3cbd1;
-  --x:#2f6f9e; --y:#c26a16; --third:#4a7c59; --flag:#a8322a;
+  --x:#2f6f9e; --y:#c26a16; --third:#4a7c59; --flag:#a8322a; --y-soft:#f9e8d4;
   --bg:#f2f4f5; --fg:#131b24; --panel:#ffffff; --rule:#cfd6db; --muted:#5b6874;
   --shell:#131b24; --shell-fg:#dbe3e8; --shell-line:#2c3844;
   box-sizing:border-box;
@@ -28,14 +28,14 @@
   :root:not([data-theme="light"]){
     --bg:#0e151c; --fg:#dde4e9; --panel:#16202a; --rule:#2a3642; --muted:#8f9 da8;
     --muted:#8f9da8; --paper:#16202a; --paper-2:#1c2731; --line:#2a3642;
-    --x:#6aa8d6; --y:#e0975a; --third:#7fae90; --flag:#d9776e;
+    --x:#6aa8d6; --y:#e0975a; --third:#7fae90; --flag:#d9776e; --y-soft:#3a2b1c;
     --shell:#0a1017; --shell-fg:#dde4e9; --shell-line:#1f2a35;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0e151c; --fg:#dde4e9; --panel:#16202a; --rule:#2a3642; --muted:#8f9da8;
   --paper:#16202a; --paper-2:#1c2731; --line:#2a3642;
-  --x:#6aa8d6; --y:#e0975a; --third:#7fae90; --flag:#d9776e;
+  --x:#6aa8d6; --y:#e0975a; --third:#7fae90; --flag:#d9776e; --y-soft:#3a2b1c;
   --shell:#0a1017; --shell-fg:#dde4e9; --shell-line:#1f2a35;
 }
 *,*::before,*::after{box-sizing:inherit}
@@ -202,6 +202,11 @@ table.grid th.sorted .sa{color:var(--x)}
 .showtog input{margin:0}
 .qedit.off .qnum{color:var(--muted);text-decoration:line-through}
 .qedit.off textarea{opacity:.5}
+.fixedline{margin:-.3rem 0 .7rem;padding:.4rem .5rem;background:var(--paper-2);
+  border-left:2px solid var(--rule)}
+.fixedline p{margin:.15rem 0 0;font-size:.8rem;color:var(--muted)}
+.promptfull{margin-top:.45rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.76rem;line-height:1.45;background:var(--paper-2)}
 .guidebar{margin:0 0 .55rem;gap:.4rem}
 .guidebar .tiny{margin-right:auto}
 .btn.mini{padding:.18rem .5rem;font-size:.76rem}
@@ -224,6 +229,11 @@ table.grid th.sorted .sa{color:var(--x)}
 .noteed textarea{font-size:.84rem}
 .interptop{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1px;
   background:var(--rule);border:1px solid var(--rule);margin-bottom:.8rem}
+/* sitting under the charts, this block needs a clear edge of its own so a
+   student scrolling down cannot read past the question without seeing it */
+.interptop.below{margin:1rem 0 0;border-top:3px solid var(--x)}
+.interptop.below > section{max-height:none}
+.interptop.below .itemcol > h3:first-child{font-size:1.05rem;color:var(--x)}
 .interptop > section{background:var(--panel);padding:.8rem .85rem;min-width:0;
   max-height:min(50vh,480px);overflow:auto}
 .interptop .itemcol .tossgrid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
@@ -542,6 +552,19 @@ table.grid td.unfilled{background:repeating-linear-gradient(0deg,transparent,tra
 table.grid td.rowlab{background:var(--paper-2);font-weight:500;font-variant-numeric:tabular-nums}
 table.grid td.aim{box-shadow:inset 0 0 0 2px var(--x)}
 table.grid tr.aim td{box-shadow:inset 0 2px 0 -1px var(--x),inset 0 -2px 0 -1px var(--x)}
+/* tapping a value only lights it up on the web; it never changes the data,
+   so the marking is a soft wash that a second tap clears */
+table.grid td.link{cursor:pointer}
+table.grid td.link:hover{background:var(--paper-2)}
+table.grid td.link:focus-visible{outline:2px solid var(--x);outline-offset:-2px}
+table.grid td.lit{background:var(--y-soft);box-shadow:inset 0 0 0 2px var(--y)}
+table.grid td.rowlab.lit{background:var(--y-soft)}
+table.grid tr.lit td{background:var(--y-soft)}
+table.grid tr.lit td:first-child{box-shadow:inset 2px 0 0 var(--y)}
+.linknote{margin-top:.35rem;color:var(--y)}
+.wnode.lit .halo,.hub.lit .halo{animation:halofade 1.6s ease-out infinite}
+@keyframes halofade{0%{opacity:.85;transform:none}70%{opacity:.15}100%{opacity:.85}}
+@media(prefers-reduced-motion:reduce){.wnode.lit .halo,.hub.lit .halo{animation:none}}
 
 /* interpretation */
 .toss{border:1px solid var(--line);padding:.6rem;background:var(--paper-2);margin-top:.6rem}
@@ -817,8 +840,10 @@ const state={
   resUsed:{},               // Interpretation: which resources the student says they leaned on
   markScope:'one',          // mark in this chart only, or the same observation everywhere
   tsort:null,               // Extraction table: which column is sorted, and which way
+  tlink:null,               // Extraction table: {row,col} the student tapped, lit up on the web
   openSec:{},               // which right-column sections are expanded
   openGroup:'t.name',       // the one teacher group that is open
+  promptPreview:false,      // teacher view: is the whole assembled prompt on show
   openChecks:null,          // which dataset card has its checks expanded
   reveal:null,
   noticed:[],               // flagged anomalies
@@ -1125,7 +1150,7 @@ const STAGES=[
 ];
 function resetWork(){
   state.vizzes=[];state.vizSeq=1;state.observedRows=[];state.observedVars=[];
-  state.placed=[];state.manualPlaced=[];state.collected=false;state.reveal=null;state.exRow=0;state.exPage=1;state.cells={};state.tsort=null;
+  state.placed=[];state.manualPlaced=[];state.collected=false;state.reveal=null;state.exRow=0;state.exPage=1;state.cells={};state.tsort=null;state.tlink=null;
   state.notMeasured=[];state.sceneGen={loading:false,error:''};state.idPage=1;state.annots={};
   state.noticed=[];state.markScope='one';state.responses={};state.storySeq=1;state.zoomViz=null;
   state.think={};state.cantTell='';state.starred={};state.keepWhy={};
@@ -1140,7 +1165,7 @@ function viewStudent(){
     const b=document.createElement('button');
     b.className='stage'; b.setAttribute('aria-current',String(state.stage===s.k));
     b.innerHTML=`<span class="nm">${s.nm}</span>`;
-    b.onclick=()=>{state.stage=s.k;render();};
+    b.onclick=()=>{state.stage=s.k;state.tlink=null;render();};
     tabs.appendChild(b);
   });
   main.appendChild(tabs);
@@ -1387,7 +1412,7 @@ function blankDraft(key){
   const st=STARTER_BRIEF[key]||{body:'',ask:''};
   return {title:'',dataset:key,brief:{body:st.body,ask:st.ask},
           items:(function(){const o={};for(const k in STARTER_STEMS)o[k]=[{q:STARTER_STEMS[k],gold:''}];return o;})(),gold:{},vars:[],
-          stance:'toss',scene:null,threshold:3,texts:{},examples:{},
+          stance:'toss',scene:null,threshold:3,texts:{},examples:{},prompts:{},
           guideOn:{extraction:true,identification:true,interpretation:true,storytelling:true},
           hidden:{},
           resources:starterResources(key)};
@@ -1781,7 +1806,7 @@ function paneExtraction(p){
     if(o.n===2&&!state.placed.length){
       b.disabled=true; b.title='Put something on the web first.';
     }
-    b.onclick=()=>{state.exPage=o.n;state.reveal=null;render();};
+    b.onclick=()=>{state.exPage=o.n;state.reveal=null;state.tlink=null;render();};
     nav.appendChild(b);
   });
   main.appendChild(nav);
@@ -1947,19 +1972,19 @@ function paneExtractionB(p){
   bPrev.type='button'; bPrev.textContent='\u2039'; bPrev.title='Previous observation';
   bPrev.setAttribute('aria-label','Previous observation');
   bPrev.disabled=cur===0;
-  bPrev.onclick=()=>{state.exRow=cur-1;render();};
+  bPrev.onclick=()=>{state.exRow=cur-1;state.tlink=null;render();};
   const bNext=document.createElement('button');
   bNext.type='button'; bNext.textContent='\u203A'; bNext.title='Next observation';
   bNext.setAttribute('aria-label','Next observation');
   bNext.disabled=cur>=p.n-1;
-  bNext.onclick=()=>{state.exRow=cur+1;render();};
+  bNext.onclick=()=>{state.exRow=cur+1;state.tlink=null;render();};
   step.append(bPrev,bNext);
   const lab=el('span','counter');
   lab.innerHTML=`<b>${esc(obsLabel(p,cur))}</b> \u00b7 ${state.observedRows.length} of ${p.n} in your table`;
   left.append(step,lab);
 
   const right=el('div','grp');
-  right.appendChild(btn('Back to the picture',()=>{state.exPage=1;render();},'ghost'));
+  right.appendChild(btn('Back to the picture',()=>{state.exPage=1;state.tlink=null;render();},'ghost'));
   if(state.observedRows.length>1){
     right.appendChild(btn('Put them in order',()=>{
       state.observedRows.sort((a,b)=>a-b); render();
@@ -2005,7 +2030,7 @@ function webStrip(p,cur,tv){
       card.appendChild(miniWeb(p,i,PX[dist],tv));
       const t=el('div','minilab'); t.textContent=obsLabel(p,i);
       card.appendChild(t);
-      card.onclick=()=>{state.exRow=i;render();};
+      card.onclick=()=>{state.exRow=i;state.tlink=null;render();};
       card.title='Tap to bring this observation to the middle';
     }
     slot.appendChild(card);
@@ -2021,17 +2046,24 @@ function focusWeb(p,rowIdx,px,tv){
   svg.setAttribute('width',px); svg.setAttribute('height',px);
   svg.appendChild(mk('circle',{cx:c,cy:c,r:R,fill:'none',stroke:'var(--line)'}));
   const cells=state.cells[rowIdx]||{};
+  const lk=state.tlink;
+  const litRow = lk&&lk.row===rowIdx;
   tv.forEach((vi,kk)=>{
     const ang=(kk/tv.length)*Math.PI*2-Math.PI/2;
     const x=c+R*Math.cos(ang), y=c+R*Math.sin(ang);
     const raw=p.rows[rowIdx][vi];
     const used=!!cells[vi];
-    const g=mk('g',{class:'wnode'+(used?' used':'')});
-    g.appendChild(mk('line',{x1:c,y1:c,x2:x,y2:y,stroke:'var(--line)'}));
+    const lit = litRow && lk.col===vi;
+    const g=mk('g',{class:'wnode'+(used?' used':'')+(lit?' lit':'')});
+    g.appendChild(mk('line',{x1:c,y1:c,x2:x,y2:y,
+      stroke:lit?'var(--y)':'var(--line)','stroke-width':lit?2.5:1}));
+    if(lit) g.appendChild(mk('circle',{cx:x,cy:y,r:26,fill:'none',
+      stroke:'var(--y)','stroke-width':3,opacity:.85,class:'halo'}));
     g.appendChild(mk('circle',{cx:x,cy:y,r:17,
-      fill:'var(--panel)',
-      stroke:isBlank(raw)?'var(--flag)':'var(--x)','stroke-width':used?1:2,
-      'stroke-dasharray':used?'2 3':''}));
+      fill:lit?'var(--y-soft)':'var(--panel)',
+      stroke:lit?'var(--y)':(isBlank(raw)?'var(--flag)':'var(--x)'),
+      'stroke-width':lit?3:(used?1:2),
+      'stroke-dasharray':(used&&!lit)?'2 3':''}));
     const gl=mk('text',{x,y:y+1,'text-anchor':'middle','dominant-baseline':'middle','font-size':15},glyphFor(p.cols[vi]));
     gl.style.pointerEvents='none';
     g.appendChild(gl);
@@ -2048,8 +2080,13 @@ function focusWeb(p,rowIdx,px,tv){
     dragFrom(g,glyphFor(p.cols[vi]),()=>recordCell(p,rowIdx,vi),{row:rowIdx,col:vi});
     svg.appendChild(g);
   });
-  const hub=mk('g',{class:'hub'});
-  hub.appendChild(mk('circle',{cx:c,cy:c,r:26,fill:'var(--paper-2)',stroke:'var(--rule)'}));
+  const litHub = litRow && lk.col===null;
+  const hub=mk('g',{class:'hub'+(litHub?' lit':'')});
+  if(litHub) hub.appendChild(mk('circle',{cx:c,cy:c,r:35,fill:'none',
+    stroke:'var(--y)','stroke-width':3,opacity:.85,class:'halo'}));
+  hub.appendChild(mk('circle',{cx:c,cy:c,r:26,
+    fill:litHub?'var(--y-soft)':'var(--paper-2)',
+    stroke:litHub?'var(--y)':'var(--rule)','stroke-width':litHub?3:1}));
   const ht=mk('text',{x:c,y:c+1,'text-anchor':'middle','dominant-baseline':'middle',
     'font-size':12,fill:'var(--muted)'},shorten(obsLabel(p,rowIdx),8));
   ht.style.pointerEvents='none';
@@ -2135,24 +2172,48 @@ function recordTable(p,tv){
   head.appendChild(sortHeader(p,obsColName(p),'obs'));
   tv.forEach(i=>head.appendChild(sortHeader(p,p.cols[i],i)));
   tab.appendChild(head);
+  const lk=state.tlink;
   sortedRows(p,tv).forEach(r=>{
     const tr=document.createElement('tr'); tr.setAttribute('data-r',r);
-    const td0=document.createElement('td'); td0.className='rowlab'; td0.textContent=obsLabel(p,r);
+    const rowLit = lk&&lk.row===r;
+    if(rowLit&&lk.col===null) tr.classList.add('lit');
+    const td0=document.createElement('td');
+    td0.className='rowlab link'+(rowLit&&lk.col===null?' lit':'');
+    td0.textContent=obsLabel(p,r);
+    td0.tabIndex=0;
+    td0.title='Tap to bring this whole observation to the middle of the web';
+    td0.onclick=()=>linkTo(r,null);
+    td0.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();linkTo(r,null);}};
     tr.appendChild(td0);
     tv.forEach(i=>{
       const td=document.createElement('td');
       td.setAttribute('data-r',r); td.setAttribute('data-c',i);
-      if(!(state.cells[r]&&state.cells[r][i])){ td.className='unfilled'; td.textContent=''; }
+      const cls=['link'];
+      if(rowLit&&lk.col===i) cls.push('lit');
+      if(!(state.cells[r]&&state.cells[r][i])){ cls.push('unfilled'); td.textContent=''; }
       else{
         const v=p.rows[r][i];
-        if(isBlank(v)){td.className='blankcell';td.textContent='';}
+        if(isBlank(v)){cls.push('blankcell');td.textContent='';}
         else td.textContent=String(v);
       }
+      td.className=cls.join(' ');
+      td.tabIndex=0;
+      td.title='Tap to find this value on the web';
+      td.onclick=()=>linkTo(r,i);
+      td.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();linkTo(r,i);}};
       tr.appendChild(td);
     });
     tab.appendChild(tr);
   });
   wrap.appendChild(tab); box.appendChild(wrap);
+  const kl=el('p','tiny muted'); kl.style.marginTop='.35rem';
+  kl.textContent=lk
+    ? (lk.col===null
+        ? 'Showing ' + obsLabel(p,lk.row) + ' in the middle of the web. Tap it again to stop showing it.'
+        : 'Lit up on the web: ' + p.cols[lk.col] + ' in ' + obsLabel(p,lk.row) + '. Tap it again to turn it off.')
+    : 'Tap a value to light it up on the web above. Tap an observation name to bring that whole web to the middle.';
+  if(lk) kl.className='tiny linknote';
+  box.appendChild(kl);
   const k1=el('p','tiny muted'); k1.style.marginTop='.35rem';
   k1.textContent=txt('ex.tableNote');
   if(shows('ex.tableNote')) box.appendChild(k1);
@@ -2161,6 +2222,17 @@ function recordTable(p,tv){
   k2.textContent=txt('ex.sortNote');
   if(shows('ex.sortNote')) box.appendChild(k2);
   return box;
+}
+
+/* ---------- table tap -> web ----------
+   Nothing about the data changes here. The tap only moves the web to that
+   observation and lights one node, and tapping the same thing again puts it
+   out, so a student cannot mistake the highlight for an edit. */
+function linkTo(row,col){
+  const cur=state.tlink;
+  if(cur&&cur.row===row&&cur.col===col) state.tlink=null;
+  else { state.tlink={row:row,col:col}; state.exRow=row; }
+  render();
 }
 
 /* ---------- observation labels ---------- */
@@ -2254,7 +2326,7 @@ function makeStripSwipe(strip,p){
       const dir=dx>0?-1:1;
       const n=Math.max(0,Math.min(p.n-1,(state.exRow||0)+dir));
       x0=null;
-      if(n!==state.exRow){state.exRow=n;render();}
+      if(n!==state.exRow){state.exRow=n;state.tlink=null;render();}
     }
   });
   const end=()=>{x0=null;};
@@ -3672,13 +3744,14 @@ function resourceCard(r,q,id){
 }
 
 function paneInterpretation(p){
-  /* upper half: the task on the left, looking something up on the right;
-     lower half: the charts, full width, each beside its thinking boxes */
-  const top=el('div','interptop');
+  /* Charts first, full width, each beside its thinking boxes. The student
+     reads their own charts before being asked to explain them, so the task
+     and the shelf sit underneath, where the writing actually happens. */
+  const surf=el('section','interpcharts');
+  const top=el('div','interptop below');
   const item=el('section','itemcol'), tray=el('section','tray lookup');
   top.append(item,tray);
-  const surf=el('section','interpcharts');
-  main.append(top,surf);
+  main.append(surf,top);
   const _t=activeTask();
 
   /* ---- left: what the teacher put on the shelf, once they have had a go ----
@@ -3837,6 +3910,47 @@ function paneInterpretation(p){
   item.appendChild(tz);
 }
 
+/* ============================================================
+   THE PROMPT DRS IS GIVEN
+   The wording that used to sit inside askToss lives here instead, split
+   into named parts a teacher can rewrite in the Teacher view without
+   touching any code. Only the line that fixes the JSON keys is held back,
+   because changing it stops the three replies being read at all.
+   A task with no edits sends exactly the defaults below.
+   ============================================================ */
+const PROMPT_FORMAT='Given the student\u2019s interpretation below, write THREE different replies to it. '+
+  'Return strict JSON only, no prose, no code fences, with keys "toss", "hint", "answer".';
+const PROMPT_PARTS=[
+  ['role','What DRS is doing',
+   'You are helping a high school science teacher study how students reason about data.'],
+  ['toss','Reply 1 \u2014 a question back',
+   'a single reflective question that hands the thinking back to the student. It must point at something specific in their own words or in the data. Do not supply any new information or evaluate whether they are right. One or two sentences.'],
+  ['hint','Reply 2 \u2014 a hint',
+   'a nudge that names where to look next but stops short of the explanation. One or two sentences.'],
+  ['answer','Reply 3 \u2014 the answer',
+   'a direct explanation that tells the student what is going on. Two or three sentences.'],
+  ['style','How all three should be written',
+   'Write all three for a 15-year-old: short sentences, everyday words, no technical terms the student did not use first. Never more than three sentences.']
+];
+const PROMPT_DEF=(function(){const o={};PROMPT_PARTS.forEach(([k,,d])=>o[k]=d);return o;})();
+/* a teacher's wording if they wrote one, otherwise DRS's own */
+function promptPart(t,key){
+  const w=t&&t.prompts&&t.prompts[key];
+  return (typeof w==='string'&&w.trim())?w.trim():PROMPT_DEF[key];
+}
+/* the whole prompt, exactly as it is sent. ctx may be left out to preview it. */
+function buildTossPrompt(t,ctx){
+  const body=[
+    promptPart(t,'role'),
+    PROMPT_FORMAT,
+    '- "toss": '+promptPart(t,'toss'),
+    '- "hint": '+promptPart(t,'hint'),
+    '- "answer": '+promptPart(t,'answer'),
+    promptPart(t,'style')
+  ].join('\n');
+  return ctx ? body+'\n\n'+ctx : body;
+}
+
 async function askToss(p){
   const resp=state.responses.interpretation||'';
   if(!resp.trim()){toast('Write your explanation first');return;}
@@ -3858,14 +3972,7 @@ ${think||'(nothing written yet)'}
 What they say the data cannot tell them: ${state.cantTell||'(not said)'}
 Student's interpretation: "${resp}"
 ${shelfCtx()}`;
-  const instr=`You are helping a high school science teacher study how students reason about data.
-Given the student's interpretation below, write THREE different replies to it. Return strict JSON only, no prose, no code fences, with keys "toss", "hint", "answer".
-- "toss": a single reflective question that hands the thinking back to the student. It must point at something specific in their own words or in the data. Do not supply any new information or evaluate whether they are right. One or two sentences.
-- "hint": a nudge that names where to look next but stops short of the explanation. One or two sentences.
-- "answer": a direct explanation that tells the student what is going on. Two or three sentences.
-Write all three for a 15-year-old: short sentences, everyday words, no technical terms the student did not use first. Never more than three sentences.
-
-${ctx}`;
+  const instr=buildTossPrompt(activeTask(),ctx);
   if(CAP.sample){
     try{
       const out=await CAP.sample.json(instr,{modelTier:'default'});
@@ -5174,6 +5281,8 @@ function viewTeacher(){
     }));
   });
 
+  group(left,'t.prompt','The wording DRS is given',body=>{ tPrompt(draft,body); });
+
   const act=el('div','row');
   act.appendChild(btn('Save task',async()=>{
     if(!draft.title.trim()){toast('Give the task a name');return;}
@@ -5211,6 +5320,90 @@ function viewTeacher(){
     right.appendChild(ul);
   }
   },true);
+}
+
+/* ---------- the prompt panel ----------
+   Every box is empty by default and shows DRS's own wording as a placeholder,
+   so an untouched task behaves exactly as it did before anyone opened this. */
+function tPrompt(draft,body){
+  if(!draft.prompts) draft.prompts={};
+
+  const n=el('p','tiny muted'); n.style.margin='0 0 .5rem';
+  n.textContent='This is the instruction DRS is given each time a student presses \u201cShow three replies\u201d on the Interpretation page. '+
+    'The student never sees it. Rewrite any part in your own words; leave a box empty to keep DRS\u2019s wording.';
+  body.appendChild(n);
+
+  const edited=PROMPT_PARTS.filter(([k])=>(draft.prompts[k]||'').trim()).length;
+  const bar=el('div','row guidebar');
+  const cnt=el('span','tiny muted');
+  cnt.textContent=edited?edited+' of '+PROMPT_PARTS.length+' parts rewritten':'All parts are DRS\u2019s own wording';
+  const ra=btn('Reset all',()=>{draft.prompts={};render();},'ghost');
+  ra.classList.add('mini'); ra.disabled=!edited;
+  bar.append(cnt,ra); body.appendChild(bar);
+
+  PROMPT_PARTS.forEach(([key,label,def])=>{
+    const mine=(draft.prompts[key]||'').trim();
+    const r=el('div','qedit'+(mine?'':' plain'));
+    const hd=el('div','qhead');
+    const t=el('span','qnum'); t.textContent=label;
+    hd.appendChild(t);
+    if(mine){
+      const rb=document.createElement('button'); rb.className='iconb'; rb.textContent='reset';
+      rb.title='Go back to DRS\u2019s wording';
+      rb.onclick=()=>{delete draft.prompts[key];render();};
+      hd.appendChild(rb);
+    }
+    r.appendChild(hd);
+    const ta=document.createElement('textarea');
+    ta.rows=key==='toss'?4:3;
+    ta.placeholder=def;
+    ta.value=draft.prompts[key]||'';
+    ta.oninput=()=>{draft.prompts[key]=ta.value;};
+    r.appendChild(ta);
+    body.appendChild(r);
+
+    /* the one line that cannot move, shown where it actually sits */
+    if(key==='role'){
+      const f=el('div','fixedline');
+      const fl=el('span','tiny muted'); fl.textContent='Fixed \u2014 this line keeps the three replies readable:';
+      const fb=el('p'); fb.textContent=PROMPT_FORMAT;
+      f.append(fl,fb); body.appendChild(f);
+    }
+  });
+
+  const nb=el('p','tiny muted'); nb.style.margin='.5rem 0 .35rem';
+  nb.textContent='What the student wrote, their chart notes and the sources you left are added underneath automatically.';
+  body.appendChild(nb);
+
+  const pv=el('div','row');
+  const open=!!state.promptPreview;
+  pv.appendChild(btn(open?'Hide the whole prompt':'See the whole prompt',
+    ()=>{state.promptPreview=!open;render();},'ghost'));
+  pv.appendChild(btn('Copy the whole prompt',()=>{
+    const full=buildTossPrompt(draft,'');
+    const done=()=>toast('Prompt copied');
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(full).then(done,()=>fallbackCopy(full,done));
+    } else fallbackCopy(full,done);
+  },'ghost'));
+  body.appendChild(pv);
+  const cn=el('p','tiny muted'); cn.style.margin='.3rem 0 0';
+  cn.textContent='Copying gives you the exact wording to paste into any other model, so a comparison uses one identical prompt.';
+  body.appendChild(cn);
+
+  if(open){
+    const box=document.createElement('textarea');
+    box.className='promptfull'; box.rows=14; box.readOnly=true;
+    box.value=buildTossPrompt(draft,'');
+    body.appendChild(box);
+  }
+}
+function fallbackCopy(text,then){
+  const a=document.createElement('textarea');
+  a.value=text; a.style.position='fixed'; a.style.opacity='0';
+  document.body.appendChild(a); a.select();
+  try{document.execCommand('copy');then();}catch(e){toast('Could not copy \u2014 select the text instead');}
+  a.remove();
 }
 
 function tResources(draft,body){
