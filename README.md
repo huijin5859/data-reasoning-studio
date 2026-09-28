@@ -3,24 +3,9 @@
 # DRS — Data Reasoning Studio
 
 A research prototype for helping students reason with messy, authentic scientific data
-through four processes: Extraction, Identification, Interpretation and Evaluation.
+through four reasoning processes: Extraction, Identification, Interpretation, and storytelling.
 
 It is a single self-contained web page (`index.html`). There is no build step and no server code.
-
-## Publish on GitHub Pages
-
-1. Create a new repository on GitHub (for example `drs`).
-2. Upload everything in this folder (`index.html`, `README.md` and the `assets` folder)
-   to the root of the repository.
-3. In the repository, go to **Settings → Pages**.
-4. Under **Build and deployment**, set **Source** to *Deploy from a branch*, choose the
-   `main` branch and the `/ (root)` folder, then **Save**.
-5. After a minute or two the site is live at `https://<your-username>.github.io/<repository-name>/`.
-
-Data a person uploads with **Add your own data** never leaves their browser.
-
-Everything saved lives in the browser's local storage under keys starting with `drs:`.
-Clearing site data in the browser deletes it.
 
 ## Files
 
