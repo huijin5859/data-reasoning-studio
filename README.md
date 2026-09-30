@@ -21,13 +21,9 @@ DRS is designed for K-12 science classrooms, where students work directly with a
 DRS is shaped by teachers and parents who serve as consultants to the project team. They review designs, test classroom materials, and make sure the tool meets the needs of students, teachers, and families.
 
 **Teacher Consultants:**
-- [Teacher Name], [School]
-- [Teacher Name], [School]
-- [Teacher Name], [School]
-
-**Family Consultants:**
-- [Parent Name]
-- [Parent Name]
+- Patti Howell, Executive Director of Georgia Science Teachers Association, Americus Sumter High School South, Americus, GA
+- Coco Anderson, Power School, Power, MT
+- Melissa Goretskie, Power School, Power, MT
 
 ## Files
 
@@ -38,10 +34,10 @@ The four built-in datasets are included in the app and are publicly visible in t
 
 ## Data Sources
 
-- [Dataset name] — [source, e.g., organization or publication], [license or terms of use]
-- [Dataset name] — [source], [license or terms of use]
-- [Dataset name] — [source], [license or terms of use]
-- [Dataset name] — [source], [license or terms of use]
+- Isle Royale wolves and moose, Isle Royale Wolf-Moose Project: https://www.isleroyalewolf.org/
+- EPA vehicle emissions test data, U.S. Environmental Protection Agency: https://www.epa.gov/compliance-and-fuel-economy-data/data-cars-used-testing-fuel-economy 
+- Yellowstone wolves and elk: Cooper, D. J., & Hobbs, N. T. (2023). Twenty years of Salix height in response to experimental manipulation of browsing and water table, northern range of Yellowstone National Park [Dataset]. Dryad. https://doi.org/10.5061/dryad.sqv9s4n7n
+- Pribilof Islands reindeer: Scheffer, V. B. (1951). The rise and fall of a reindeer herd. The Scientific Monthly, 73(6), 356–362. American Association for the Advancement of Science.
 
 ## Contributing
 
