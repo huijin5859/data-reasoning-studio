@@ -826,9 +826,7 @@ const state={
   storySeq:1,
   zoomViz:null,
   exOpen:null,
-  participant:'',           // who is answering, for the researcher's records
-  session:'s'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4),
-  allResponses:null,
+  /* No participant name and no session id: DRS does not identify anyone. */
   dsNames:{},               // renamed datasets
   renaming:null,
   think:{},                 // Interpretation: claim / rival / evidence / what would change my mind
@@ -863,30 +861,12 @@ function prof(key){
 
 /* ---------- capabilities ---------- */
 let CAP={db:null,sample:null,user:null,downloads:null};
-/* Standalone (GitHub Pages): no claude.ai runtime, so keep data in this
-   browser and download files directly. Live Claude replies are unavailable;
-   the written examples are used instead. */
+/* Standalone (GitHub Pages): no claude.ai runtime, so live replies are
+   unavailable and the written examples are used instead. Nothing is written
+   to localStorage, sessionStorage, cookies or any other browser store -
+   downloading a file is the only way anything leaves the page. */
 function localCaps(){
-  const P='drs:';
-  const db={
-    doc(path){return{async set(rec){localStorage.setItem(P+path,JSON.stringify(rec));}};},
-    collection(name){
-      let n=1e9;
-      const q={limit(k){n=k;return q;},async get(){
-        const out=[];
-        for(let i=0;i<localStorage.length;i++){
-          const k=localStorage.key(i);
-          if(k&&k.startsWith(P+name+'/')){
-            try{out.push({id:k.slice((P+name+'/').length),data:JSON.parse(localStorage.getItem(k))});}catch(e){}
-          }
-        }
-        return out.slice(0,n);
-      }};
-      return q;
-    }
-  };
-  try{localStorage.setItem(P+'probe','1');localStorage.removeItem(P+'probe');}catch(e){return{db:null,sample:null,user:null,downloads:dl()};}
-  return{db,sample:null,user:null,downloads:dl()};
+  return{db:null,sample:null,user:null,downloads:dl()};
 }
 function dl(){
   const typeOf=n=>/\.html?$/i.test(n)?'text/html':/\.csv$/i.test(n)?'text/csv':'text/plain';
@@ -898,26 +878,21 @@ function dl(){
   };
   return{async save(o){go(o.filename,o.data);},async file(name,data,o){go(name,data,o&&o.mimeType);}};
 }
+/* Only two capabilities are asked for: the model, so DRS can reply, and the
+   file download, so a student can take their own report away. Deliberately
+   NOT requested:
+     'db'   - no student work is written to any store, here or anywhere else.
+     'user' - DRS never asks who the visitor is. */
 (async()=>{
   await Promise.resolve();
-  if(!window.claude||!claude.use){ CAP=localCaps(); if(CAP.db) loadTasks(); render(); return; }
-  const [db,sample,user,downloads]=await Promise.all([
-    claude.use('db').catch(()=>null),
+  if(!window.claude||!claude.use){ CAP=localCaps(); render(); return; }
+  const [sample,downloads]=await Promise.all([
     claude.use('sample').catch(()=>null),
-    claude.use('user').catch(()=>null),
     claude.use('downloads').catch(()=>null)
   ]);
-  CAP={db,sample,user,downloads};
-  if(db){ loadTasks(); }
+  CAP={db:null,sample,user:null,downloads};
   render();
 })();
-async function loadTasks(){
-  try{
-    const snap=await CAP.db.collection('tasks').limit(50).get();
-    state.tasks=(snap||[]).map(d=>Object.assign({_id:d.id||d._id},d.data||d));
-    if(state.view==='teacher'||state.view==='student') render();
-  }catch(e){ /* empty store */ }
-}
 
 /* ============================================================
    RENDER
@@ -1342,52 +1317,15 @@ function itemCol(host,stageKey,defaultStem){
   });
   return first;
 }
+/* Answers are held in state.responses as the student types, and go no further.
+   Nothing is sent anywhere and nothing survives the page being closed; the
+   student's own download is the only way work leaves the browser.
+   If collected data is ever wanted, this is the place to write it - but that
+   is a change to the study design, not a change to a button. */
 async function saveResponse(stageKey){
   const txtv=state.responses[stageKey]||'';
   if(!txtv.trim()){ toast('Nothing written yet'); return; }
-  const rec={
-    participant:state.participant||'(not named)',
-    session:state.session,
-    dataset:state.dsKey,
-    datasetName:dsName(state.dsKey),
-    stage:stageKey,
-    text:txtv,
-    noticed:state.noticed.map(x=>x.text),
-    chartNotes:state.vizzes.flatMap(v=>((v.anno&&v.anno.notes)||[]).map(n=>n.text).filter(Boolean)),
-    thinking:state.think,
-    cantTell:state.cantTell,
-    kept:Object.keys(state.starred).filter(k=>state.starred[k]),
-    charts:state.vizzes.map(v=>v.type),
-    route:state.route,
-    at:new Date().toISOString()
-  };
-  if(!CAP.db){ toast('Could not save \u2014 this browser blocks storage'); return; }
-  try{
-    await CAP.db.doc('responses/'+state.session+'_'+stageKey+'_'+Date.now()).set(rec);
-    toast('Response saved');
-  }catch(e){ toast('Could not save \u2014 it is still in this session'); }
-}
-
-async function loadResponses(){
-  if(!CAP.db){ toast('This browser blocks storage'); return; }
-  try{
-    const snap=await CAP.db.collection('responses').limit(500).get();
-    state.collected=null;
-    state.allResponses=(snap||[]).map(d=>Object.assign({_id:d.id||d._id},d.data||d))
-      .sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));
-    render();
-  }catch(e){ state.allResponses=[]; render(); }
-}
-function responsesCSV(){
-  const rows=[['participant','session','dataset','stage','route','when','marked points','response']];
-  (state.allResponses||[]).forEach(r=>{
-    rows.push([r.participant||'',r.session||'',r.datasetName||r.dataset||'',r.stage||'',
-      r.route||'',r.at||'',(r.noticed||[]).join(' | '),r.text||'']);
-  });
-  return rows.map(r=>r.map(c=>{
-    const v=String(c===undefined||c===null?'':c);
-    return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
-  }).join(',')).join('\n');
+  toast('Kept while this page is open');
 }
 
 /* ============================================================
@@ -5413,10 +5351,8 @@ function viewTeacher(){
   act.appendChild(btn('Save task',async()=>{
     if(!draft.title.trim()){toast('Give the task a name');return;}
     const rec=Object.assign({},draft,{at:new Date().toISOString()});
-    if(CAP.db){
-      try{ await CAP.db.doc('tasks/'+Date.now()).set(rec); await loadTasks(); toast('Task saved'); }
-      catch(e){ state.tasks.push(rec); toast('Saved in this session'); }
-    } else { state.tasks.push(rec); toast('Saved in this session'); }
+    state.tasks.push(rec);
+    toast('Saved in this session');
     render();
   }));
   act.appendChild(btn('Try it as a student',()=>{
