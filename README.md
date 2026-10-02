@@ -4,8 +4,6 @@
 
 A research prototype for helping students reason with messy, authentic scientific data through four reasoning processes: **Extraction, Identification, Interpretation, and Storytelling.**
 
-**Live demo:** https://huijin5859.github.io/data-reasoning-studio/
-
 DRS is designed for K-12 science classrooms, where students work directly with authentic research data while an AI partner supports their reasoning, surfaces misconceptions, and asks probing questions. DRS is in early development and is being built as a community-led project with teachers and families.
 
 ## Project Team
