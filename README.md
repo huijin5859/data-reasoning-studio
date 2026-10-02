@@ -6,6 +6,45 @@ A research prototype for helping students reason with messy, authentic scientifi
 
 DRS is designed for K-12 science classrooms, where students work directly with authentic research data while an AI partner supports their reasoning, surfaces misconceptions, and asks probing questions. DRS is in early development and is being built as a community-led project with teachers and families.
 
+## Try it
+
+There are two versions. Neither of them saves anything. When you close the tab, your work is gone, so download your data stories before you leave.
+
+Open Data Reasoning Studio — the public version. No account needed. You can move through all four stages, explore the built-in datasets, build and annotate charts, and write responses. The AI feedback here is a set of pre-written example responses, not live AI.
+
+Open the version with live AI — the same tool, with real AI feedback that responds to what you actually wrote. This one requires a free Claude account; replies run on your own account, not the project's. Use this version if you want to judge the quality of the feedback.
+
+## What Students Do
+
+Extraction — What did the scientists measure, and how well? Students separate observations, variables and values, first on a picture-based extraction web and then in a table.
+
+Identification — What patterns and surprises are in the data? Students build distributions, compare them side by side, and turn one sideways to make a scatterplot. Signal, noise, trends and anomalies.
+
+Interpretation — What could explain what you found? Students annotate their charts — marking points, drawing reference lines, shading regions — and write explanations that connect the data to known science.
+
+Storytelling — What is the story, and who should hear it? Students connect charts and notes on a canvas to build an argument, then publish or download it.
+
+## For teachers
+
+The tool includes a settings panel where you can rewrite the AI prompts in plain English. This is the part most worth experimenting with: you are better placed than we are to judge which wording actually helps your students. The AI does not score student work. It sees what students write and annotate, not who they are.
+
+## Privacy and data
+
+This version of DRS does not collect any data. It is deliberately built so that there is no student data to protect.
+
+No accounts, no sign-in, no names. The app never asks who you are. 
+Nothing is written to a database, to browser storage, or to cookies.
+Nothing is transmitted to any server operated by this project. The page contains no fetch or XMLHttpRequest calls of its own.
+Student work and teacher-authored tasks exist only in the browser's memory while the page is open, and are discarded when it closes.
+Downloading a file is the only way anything leaves the page, and only the person using it can do that.
+
+Two qualifications:
+
+The page loads fonts from Google Fonts and two spreadsheet-reading libraries from cdnjs. Those providers therefore see the IP address of anyone who opens it, as they would for most web pages. 
+On the full version hosted at claude.ai, AI replies are processed by Anthropic under that visitor's own account.  
+
+Data collection will be added in a later version, as a deliberate design decision rather than a default.
+
 ## Project Team
 
 **Creator and Project Lead:** Hui Jin, Georgia Southern University (Principal Investigator)
