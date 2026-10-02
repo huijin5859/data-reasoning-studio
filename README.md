@@ -10,9 +10,9 @@ DRS is designed for K-12 science classrooms, where students work directly with a
 
 There are two versions. Neither of them saves anything. When you close the tab, your work is gone, so download your data stories before you leave.
 
-Open Data Reasoning Studio — the public version. No account needed. You can move through all four stages, explore the built-in datasets, build and annotate charts, and write responses. The AI feedback here is a set of pre-written example responses, not live AI.
+[Open Data Reasoning Studio] (https://huijin5859.github.io/data-reasoning-studio/) — the public version. No account needed. You can move through all four stages, explore the built-in datasets, build and annotate charts, and write responses. The AI feedback here is a set of pre-written example responses, not live AI.
 
-Open the version with live AI — the same tool, with real AI feedback that responds to what you actually wrote. This one requires a free Claude account; replies run on your own account, not the project's. Use this version if you want to judge the quality of the feedback.
+[Open the version with live AI] (https://claude.ai/artifact/AJNZTzCdFzjwTprCTyLqc1?sk=M_7HXs6Eg0eTN5dgFxo0bw) — the same tool, with real AI feedback that responds to what you actually wrote. This one requires a free Claude account; replies run on your own account, not the project's. Use this version if you want to judge the quality of the feedback.
 
 ## What Students Do
 
