@@ -411,6 +411,7 @@ body:has(.storycanvas.focus){overflow:hidden}
 .viz{background:var(--panel);border:1px solid var(--line);position:relative;touch-action:none}
 .viz.target{border-color:var(--y);box-shadow:inset 0 0 0 2px var(--y)}
 .viz.dragging{opacity:.5}
+.viz.gest{border-color:var(--x);box-shadow:inset 0 0 0 2px var(--x)}
 .vizhead{display:flex;align-items:center;gap:.4rem;padding:.3rem .45rem;border-bottom:1px solid var(--line);font-size:.76rem;background:var(--paper-2)}
 .grip{cursor:grab;color:var(--muted);flex:none;font-size:.9rem;line-height:1;padding:0 .15rem;background:none;border:0}
 .vizhead .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -611,7 +612,6 @@ table.grid tr.lit td:first-child{box-shadow:inset 2px 0 0 var(--y)}
         <button class="navb" data-view="home">Datasets</button>
         <button class="navb" data-view="teacher">Teacher</button>
         <button class="navb" data-view="student">Student</button>
-        <button class="navb" data-view="study">Study notes</button>
       </nav>
     </div>
   </header>
@@ -949,7 +949,7 @@ function render(){
     ? {path:nodePath(act),start:act.selectionStart,end:act.selectionEnd} : null;
 
   main.innerHTML='';
-  ({home:viewHome,student:viewStudent,teacher:viewTeacher,study:viewStudy}[state.view]||viewHome)();
+  ({home:viewHome,student:viewStudent,teacher:viewTeacher}[state.view]||viewHome)();
 
   if(stay){
     window.scrollTo({top:y});
@@ -2476,6 +2476,11 @@ function paneIdentification(p){
   const rule=el('p','tiny muted'); rule.style.margin='0 0 .4rem';
   rule.textContent=txt('id.combineRule');
   if(shows('id.combineRule')) surf.appendChild(rule);
+  if(state.route==='gesture'&&window.matchMedia&&matchMedia('(pointer:coarse)').matches){
+    const fing=el('p','tiny muted'); fing.style.margin='0 0 .4rem';
+    fing.textContent='On a touchscreen you can also put two fingers on one chart and twist it to turn it sideways, or put a finger on each of two charts and bring them together to combine them.';
+    surf.appendChild(fing);
+  }
   surf.appendChild(annoBar());
   const canvas=el('div','surface');
   canvas.id='canvas';
@@ -2489,6 +2494,7 @@ function paneIdentification(p){
     state.vizzes.forEach(v=>canvas.appendChild(renderViz(p,v)));
   }
   setupCanvasDrop(canvas,p);
+  setupGestures(canvas);
   surf.appendChild(canvas);
 
   // noticed list
@@ -2848,6 +2854,11 @@ function annoPad(host,p,v){
       window.removeEventListener('pointermove',move);
       window.removeEventListener('pointerup',up);
       window.removeEventListener('pointercancel',up);
+      GEST.stroke=null;
+      if(GEST.active||GEST.fired){                 // a two-finger gesture won instead
+        if(live&&live.parentNode) live.parentNode.removeChild(live);
+        return;
+      }
       if(tool==='draw'){
         if(path.length>1){ a.paths.push(path.map(q=>toN(P,q[0],q[1]))); annoPush(v,'paths'); }
       }else if(tool==='line'){
@@ -2867,6 +2878,13 @@ function annoPad(host,p,v){
     window.addEventListener('pointermove',move);
     window.addEventListener('pointerup',up);
     window.addEventListener('pointercancel',up);
+    GEST.stroke=()=>{
+      window.removeEventListener('pointermove',move);
+      window.removeEventListener('pointerup',up);
+      window.removeEventListener('pointercancel',up);
+      if(live&&live.parentNode) live.parentNode.removeChild(live);
+      GEST.stroke=null;
+    };
   });
   return pad;
 }
@@ -3221,6 +3239,7 @@ function renderViz(p,v){
       dragPayload={kind:'viz',id:v.id};
       box.classList.add('dragging');
       const move=ev=>{
+        if(GEST.active) return;          // a second finger has taken over
         document.querySelectorAll('.viz').forEach(n=>n.classList.remove('target'));
         const t=document.elementFromPoint(ev.clientX,ev.clientY);
         const host=t&&t.closest?t.closest('.viz'):null;
@@ -3230,6 +3249,7 @@ function renderViz(p,v){
         window.removeEventListener('pointermove',move);
         window.removeEventListener('pointerup',up);
         box.classList.remove('dragging');
+        if(GEST.active||GEST.fired){ dragPayload=null; return; }
         document.querySelectorAll('.viz').forEach(n=>n.classList.remove('target'));
         const t=document.elementFromPoint(ev.clientX,ev.clientY);
         const host=t&&t.closest?t.closest('.viz'):null;
@@ -3291,6 +3311,112 @@ function combine(p,dragId,targetId){
   render();
   const node=document.querySelector(`.viz[data-id="${merged.id}"]`);
   if(node) node.classList.add('merging');
+}
+
+/* ============================================================
+   TWO-FINGER GESTURES — touch and pen, alongside the buttons.
+
+   Two fingers on ONE chart, twisted   -> that distribution turns sideways,
+                                          the same as the sideways button.
+   Two fingers on TWO charts, brought  -> the two charts combine, the same as
+   together                               dragging one onto the other.
+
+   Nothing here replaces a button, so a mouse-only machine loses nothing.
+   The browser hands us fingers one at a time and never tells us how they
+   relate, so we keep our own record of where each one is and work out the
+   distance between them (a pinch) and the angle between them (a twist).
+   ============================================================ */
+const GEST={
+  wired:false,      // window listeners attached once, not once per render
+  active:false,     // two fingers are down on charts
+  pts:new Map(),    // pointerId -> {vizId,x,y}
+  start:null,       // the gap and angle the gesture began with
+  fired:false,      // one action per gesture, so a slow twist cannot repeat
+  stroke:null       // an annotation stroke to abandon if a second finger lands
+};
+const GEST_TWIST=0.7;   // about forty degrees of turn before a twist counts
+const GEST_PINCH=0.55;  // fingers must close to just over half the opening gap
+
+function gestClear(){
+  GEST.active=false; GEST.start=null; GEST.fired=false;
+  document.querySelectorAll('.viz').forEach(n=>n.classList.remove('gest','target'));
+}
+
+function gestDown(e){
+  if(e.pointerType==='mouse') return;            // a mouse only ever has one pointer
+  const box=e.target&&e.target.closest?e.target.closest('.viz'):null;
+  if(!box) return;
+  GEST.pts.set(e.pointerId,{vizId:+box.dataset.id,x:e.clientX,y:e.clientY});
+  if(GEST.pts.size!==2) return;
+  const [a,b]=[...GEST.pts.values()];
+  GEST.active=true; GEST.fired=false;
+  GEST.start={
+    dist:Math.hypot(a.x-b.x,a.y-b.y),
+    ang:Math.atan2(b.y-a.y,b.x-a.x),
+    sameViz:a.vizId===b.vizId,
+    ids:[a.vizId,b.vizId]
+  };
+  // whatever one finger had already begun, let go of it cleanly
+  if(GEST.stroke){ try{GEST.stroke();}catch(_){} GEST.stroke=null; }
+  dragPayload=null;
+  document.querySelectorAll('.viz').forEach(n=>{
+    n.classList.remove('dragging','target','gest');
+    if(GEST.start.ids.includes(+n.dataset.id)) n.classList.add('gest');
+  });
+}
+
+function gestMove(e){
+  const rec=GEST.pts.get(e.pointerId);
+  if(!rec) return;
+  rec.x=e.clientX; rec.y=e.clientY;
+  if(!GEST.active||GEST.fired||!GEST.start) return;
+  if(e.cancelable) e.preventDefault();
+  const [a,b]=[...GEST.pts.values()].slice(0,2);
+  if(GEST.start.sameViz){
+    let turn=Math.atan2(b.y-a.y,b.x-a.x)-GEST.start.ang;
+    while(turn>Math.PI) turn-=2*Math.PI;
+    while(turn<-Math.PI) turn+=2*Math.PI;
+    if(Math.abs(turn)>GEST_TWIST){ GEST.fired=true; gestTwist(GEST.start.ids[0]); }
+  }else{
+    const gap=Math.hypot(a.x-b.x,a.y-b.y);
+    if(gap<GEST.start.dist*GEST_PINCH){
+      GEST.fired=true;
+      const p=prof(state.dsKey), ids=GEST.start.ids.slice();
+      document.querySelectorAll('.viz').forEach(n=>n.classList.remove('gest','target'));
+      combine(p,ids[0],ids[1]);
+    }
+  }
+}
+
+function gestUp(e){
+  GEST.pts.delete(e.pointerId);
+  if(GEST.pts.size<2) gestClear();
+}
+
+function gestTwist(id){
+  const v=state.vizzes.find(z=>z.id===id);
+  if(!v) return;
+  if(v.type!=='hist'&&v.type!=='parallel'){
+    toast('Only a distribution turns sideways. This chart already has a variable on each axis.');
+    return;
+  }
+  v.rotated=!v.rotated;
+  render();
+  const n=document.querySelector('.viz[data-id="'+id+'"]');
+  if(n) n.classList.add('merging');
+}
+
+function setupGestures(canvas){
+  if(state.route!=='gesture') return;           // the menu route stays a clean comparison
+  canvas.addEventListener('pointerdown',gestDown,true);
+  // Safari on iPad treats two fingers as page zoom unless we say otherwise
+  ['gesturestart','gesturechange','gestureend'].forEach(t=>
+    canvas.addEventListener(t,ev=>ev.preventDefault()));
+  if(GEST.wired) return;
+  GEST.wired=true;
+  window.addEventListener('pointermove',gestMove,{capture:true,passive:false});
+  window.addEventListener('pointerup',gestUp,true);
+  window.addEventListener('pointercancel',gestUp,true);
 }
 
 /* --- charts --- */
@@ -5555,122 +5681,6 @@ function checkGold(p,gold){
     }
   });
   return msgs.length?msgs[0]:null;
-}
-
-/* ============================================================
-   STUDY NOTES
-   ============================================================ */
-function viewStudy(){
-  const p=prof(state.dsKey);
-  const checks=vet(p);
-  const d=el('div');
-  d.innerHTML=`<h2>What this prototype is for</h2>
-  <p>Two decisions have to be made before anything gets built for real: whether finger gestures earn a place in
-  the tool, and whether a question back from the AI earns a place. Both are in here as live alternatives rather
-  than as the plan.</p>`;
-  main.appendChild(d);
-
-  const two=el('div','two');
-  const a=el('section'),b=el('section');
-  two.append(a,b);main.appendChild(two);
-
-  a.appendChild(hh('Who is at this machine'));
-  const wr=el('div','row');
-  const wi=document.createElement('input');
-  wi.type='text'; wi.placeholder='Participant label, e.g. S07';
-  wi.value=state.participant||'';
-  wi.oninput=()=>{state.participant=wi.value;};
-  wi.style.maxWidth='16rem';
-  wr.appendChild(wi);
-  a.appendChild(wr);
-  const wn=el('p','tiny muted');
-  wn.textContent='Every saved response is stamped with this label and with a session id ('+state.session+'). Set it before the student starts. Use a code, not a name.';
-  a.appendChild(wn);
-
-  a.appendChild(hh('Responses collected'));
-  const rr=el('div','row');
-  rr.appendChild(btn('Load responses',loadResponses));
-  if(state.allResponses&&state.allResponses.length&&CAP.downloads){
-    rr.appendChild(btn('Download CSV',async()=>{
-      try{
-        await CAP.downloads.file('drs-responses.csv',responsesCSV(),{mimeType:'text/csv'});
-      }catch(e){ toast('Could not download'); }
-    },'ghost'));
-  }
-  a.appendChild(rr);
-  if(state.allResponses){
-    if(!state.allResponses.length){
-      const e=el('p','small muted'); e.textContent='Nothing saved yet.';
-      a.appendChild(e);
-    }else{
-      const w=el('div','scroll-x');
-      const t=document.createElement('table'); t.className='grid';
-      const hr=document.createElement('tr');
-      ['Participant','Stage','Dataset','Route','When','Response'].forEach(x=>{
-        const th=document.createElement('th'); th.textContent=x; hr.appendChild(th);
-      });
-      t.appendChild(hr);
-      state.allResponses.slice(0,60).forEach(r=>{
-        const tr=document.createElement('tr');
-        [r.participant,r.stage,r.datasetName||r.dataset,r.route,
-         String(r.at||'').slice(0,16).replace('T',' '),r.text].forEach(x=>{
-          const td=document.createElement('td'); td.textContent=x||''; tr.appendChild(td);
-        });
-        t.appendChild(tr);
-      });
-      w.appendChild(t); a.appendChild(w);
-      const c=el('p','tiny muted');
-      c.textContent=state.allResponses.length+' saved in total'+
-        (state.allResponses.length>60?', showing the 60 most recent':'')+'.';
-      a.appendChild(c);
-    }
-  }
-
-  a.appendChild(hh('The gesture question'));
-  const p1=el('p','small');
-  p1.innerHTML=`In Identification the same three steps are available two ways. <b>Direct manipulation:</b> drag a
-  variable onto the space to see its distribution, drag a second onto that chart to get a scatterplot, drag a third
-  onto the scatterplot to colour the dots. <b>Menus and buttons:</b> choose the axes from dropdowns and press a
-  button. Same dataset, same result, same level of finish.`;
-  a.appendChild(p1);
-  const pcond=el('p','small');
-  pcond.textContent='Set the condition here before the student sits down. Students do not see this switch, so nobody chooses their own condition mid-task.';
-  a.appendChild(pcond);
-  const rt=el('div','routes'); rt.style.marginTop='.4rem';
-  [['gesture','Direct manipulation'],['menu','Menus and buttons']].forEach(([r,nm])=>{
-    const b2=document.createElement('button');
-    b2.textContent=nm;
-    b2.setAttribute('aria-pressed',String(state.route===r));
-    b2.onclick=()=>{state.route=r;state.vizzes=[];render();};
-    rt.appendChild(b2);
-  });
-  a.appendChild(rt);
-  const p1b=el('p','note');
-  p1b.textContent='Comparing against menus rather than against a polished commercial product is deliberate. A rough prototype next to a finished one measures polish, not interaction.';
-  a.appendChild(p1b);
-
-  b.appendChild(hh('The reflective toss question'));
-  const p2=el('p','small');
-  p2.textContent='In Interpretation the same student answer gets three replies side by side: a question back, a hint, and the answer. Students pick which helped; teachers and parents pick which they want. The disagreement between those two groups is the finding.';
-  b.appendChild(p2);
-  const p2b=el('p','note');
-  p2b.textContent='This is the probe aimed squarely at the worry that AI does the thinking for students. It asks people to choose rather than to comment.';
-  b.appendChild(p2b);
-
-  const s=el('div','panel pad'); s.style.marginTop='1rem';
-  s.appendChild(hh('This dataset, against what the task template needs'));
-  const cl=el('div','checks');
-  checks.forEach(c=>{
-    const row=el('div','chk');
-    const m=el('b',c.ok?'pass':(c.warn?'warn':'fail'));m.textContent=c.ok?'✓':(c.warn?'~':'✕');
-    const t=el('span');t.innerHTML=esc(c.label)+(c.note?` <span class="muted">— ${esc(c.note)}</span>`:'');
-    row.append(m,t);cl.appendChild(row);
-  });
-  s.appendChild(cl);
-  const sn=el('p','note');
-  sn.textContent='The third-variable check is the one that decides whether the colour-by-a-third-variable item can run at all. A dataset can be excellent for reasoning and still fail it.';
-  s.appendChild(sn);
-  main.appendChild(s);
 }
 
 /* ============================================================
