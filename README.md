@@ -31,7 +31,7 @@ Click Try it as a student at any point to preview your changes.
 
 To build your own task, click Start a new task, or pick a dataset from the Datasets tab. The Vocabulary tab defines the data terms students meet along the way.
 
-Note: Currently, DRS saves nothing. Your work and any tasks you create disappear when you close the tab. Download your data story before you leave.
+Note: Currently, DRS saves nothing to follow IRB requirements. Your work and any tasks you create disappear when you close the tab. Download your data story before you leave.
 
 # Two Versions.
 There are two versions. Currently, neither of them saves anything, per IRB requirement. When you close the tab, your work is gone, so download your data stories before you leave.
