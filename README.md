@@ -2,15 +2,40 @@
 
 # DRS — Data Reasoning Studio
 
-A research prototype for helping students reason with messy, authentic scientific data through four reasoning processes: **Extraction, Identification, Interpretation, and Storytelling.**
+Data Reasoning Studio (DRS) is a web-based research prototype that helps K-12 students reason with messy, authentic scientific data. Students work through four reasoning processes: Extraction, Identification, Interpretation, and Storytelling. Along the way, an AI thinking partner asks probing questions, surfaces misconceptions, and scaffolds their reasoning. It does not give them the answers.
 
-DRS is designed for K-12 science classrooms, where students work directly with authentic research data while an AI partner supports their reasoning, surfaces misconceptions, and asks probing questions. DRS is in early development and is being built as a community-led project with teachers and families.
+DRS is in early development. It is being built with teachers and families, with support from the National Science Foundation (Award No. 2627588).
 
-## Try it
+▶ Open Data Reasoning Studio[https://huijin5859.github.io/data-reasoning-studio/]: no account or installation needed. Currently, live AI responses are available only to Georgia Southern University accounts. 
 
-There are two versions. Neither of them saves anything. When you close the tab, your work is gone, so download your data stories before you leave.
+Try it in 10 minutes: the Wolves and Moose task
 
-[Open Data Reasoning Studio](https://huijin5859.github.io/data-reasoning-studio/) — the public version. No account needed. You can move through all four stages, explore the built-in datasets, build and annotate charts, and write responses. The AI feedback here is a set of pre-written example responses, not live AI.
+The quickest way to see DRS is to work through the built-in example task, Wolves and Moose. It uses long-term data from the Isle Royale Wolf-Moose Project conducted by scientists at Michigan Tech.
+
+# Try an Example
+
+## See it as a student
+
+Open Data Reasoning Studio. It opens on the Datasets page.
+Click the first dataset, Isle Royale wolves and moose. This takes you to the Teacher view.
+On the right, under Saved tasks, find the example task Wolves and Moose and click Open. The task opens in the student view at the first stage, Extraction.
+Work through the four stage tabs in order: Extraction → Identification → Interpretation → Storytelling.
+When a question asks for a written answer, type your answer, then click Ask your thinking partner. The partner responds to what you wrote and pushes your reasoning further. Currently, this function is only available to Georgia Southern accounts.
+
+## See how a teacher builds it
+
+Go back to Teacher, and under Saved tasks click Edit on Wolves and Moose.
+Open each section to see how the task is set up: the background, the questions for each of the four stages, the thinking partner's role, and the exact wording the thinking partner is given.
+Click Try it as a student at any point to preview your changes.
+
+To build your own task, click Start a new task, or pick a dataset from the Datasets tab. The Vocabulary tab defines the data terms students meet along the way.
+
+Note: Currently, DRS saves nothing. Your work and any tasks you create disappear when you close the tab. Download your data story before you leave.
+
+# Two Versions.
+There are two versions. Currently, neither of them saves anything, per IRB requirement. When you close the tab, your work is gone, so download your data stories before you leave.
+
+[Open Data Reasoning Studio](https://huijin5859.github.io/data-reasoning-studio/) — the public version. No account needed. You can move through all four stages, explore the built-in datasets, build and annotate charts, and write responses. 
 
 [Open the version with live AI](https://claude.ai/artifact/AJNZTzCdFzjwTprCTyLqc1?sk=M_7HXs6Eg0eTN5dgFxo0bw) — the same tool, with real AI feedback that responds to what you actually wrote. Currently, the AI function is only accessible to Georgia Southern accounts per GS regulation.
 
@@ -23,10 +48,6 @@ Identification — What patterns and surprises are in the data? Students build d
 Interpretation — What could explain what you found? Students annotate their charts — marking points, drawing reference lines, shading regions — and write explanations that connect the data to known science.
 
 Storytelling — What is the story, and who should hear it? Students connect charts and notes on a canvas to build an argument, then publish or download it.
-
-## For teachers
-
-The tool includes a settings panel where you can rewrite the AI prompts in plain English. This is the part most worth experimenting with: you are better placed than we are to judge which wording actually helps your students. The AI does not score student work. It sees what students write and annotate, not who they are.
 
 ## Privacy and data
 
