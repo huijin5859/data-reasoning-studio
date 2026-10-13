@@ -6,7 +6,7 @@ Data Reasoning Studio (DRS) is a web-based research prototype that helps K-12 st
 
 DRS is in early development. It is being built with teachers and families, with support from the National Science Foundation (Award No. 2627588).
 
-▶ Open Data Reasoning Studio[https://huijin5859.github.io/data-reasoning-studio/]: no account or installation needed. Currently, live AI responses are available only to Georgia Southern University accounts. 
+[▶ Open Data Reasoning Studio](https://huijin5859.github.io/data-reasoning-studio/): no account or installation needed. Currently, live AI responses are available only to Georgia Southern University accounts. 
 
 Try it in 10 minutes: the Wolves and Moose task
 
