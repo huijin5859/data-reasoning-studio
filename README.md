@@ -18,8 +18,9 @@ The quickest way to see DRS is to work through the built-in example task, Wolves
 
 Open Data Reasoning Studio. It opens on the Datasets page.
 Click the first dataset, Isle Royale wolves and moose. This takes you to the Teacher view.
-On the right, under Saved tasks, find the example task Wolves and Moose and click Open. The task opens in the student view at the first stage, Extraction.
-Work through the four stage tabs in order: Extraction → Identification → Interpretation → Storytelling.
+On the right, under Saved tasks, find the example task Wolves and Moose and click Open. 
+
+The task opens in the student view at the first stage, Extraction. Work through the four stage tabs in order: Extraction → Identification → Interpretation → Storytelling.
 When a question asks for a written answer, type your answer, then click Ask your thinking partner. The partner responds to what you wrote and pushes your reasoning further. Currently, this function is only available to Georgia Southern accounts.
 
 ## See how a teacher builds it
