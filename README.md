@@ -33,7 +33,7 @@ To build your own task, click Start a new task, or pick a dataset from the Datas
 
 Note: Currently, DRS saves nothing to follow IRB requirements. Your work and any tasks you create disappear when you close the tab. Download your data story before you leave.
 
-# Two Versions.
+# Two Versions
 There are two versions. Currently, neither of them saves anything, per IRB requirement. When you close the tab, your work is gone, so download your data stories before you leave.
 
 [Open Data Reasoning Studio](https://huijin5859.github.io/data-reasoning-studio/) — the public version. No account needed. You can move through all four stages, explore the built-in datasets, build and annotate charts, and write responses. 
@@ -69,11 +69,9 @@ Data collection will be added in a later version, as a deliberate design decisio
 
 ## Project Team
 
-**Creator and Project Lead:** Hui Jin, Georgia Southern University (Principal Investigator)
-
-**Core Team:**
-- Andrew Allen, Georgia Southern University (Co-Principal Investigator)
-- Vijayalakshmi Ramasamy, Georgia Southern University (Co-Principal Investigator)
+Hui Jin, Georgia Southern University (Principal Investigator)
+Andrew Allen, Georgia Southern University (Co-Principal Investigator)
+Vijayalakshmi Ramasamy, Georgia Southern University (Co-Principal Investigator)
 
 ## Consultants
 
