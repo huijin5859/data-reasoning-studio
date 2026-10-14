@@ -70,7 +70,9 @@ Data collection will be added in a later version, as a deliberate design decisio
 ## Project Team
 
 Hui Jin, Georgia Southern University (Principal Investigator)
+
 Andrew Allen, Georgia Southern University (Co-Principal Investigator)
+
 Vijayalakshmi Ramasamy, Georgia Southern University (Co-Principal Investigator)
 
 ## Consultants
