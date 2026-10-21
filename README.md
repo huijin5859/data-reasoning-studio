@@ -12,9 +12,7 @@ DRS is in early development. It is being built with teachers and families, with 
 
 Try it in 10 minutes: the Wolves and Moose task 
 
-Click the first dataset, Isle Royale wolves and moose. On the right, under Saved tasks, find the example task Wolves and Moose and click Open.
-
-The quickest way to see DRS is to work through the built-in example task, Wolves and Moose. It uses long-term data from the Isle Royale Wolf-Moose Project conducted by scientists at Michigan Tech.
+The quickest way to see DRS is to work through the built-in example task, Wolves and Moose. It uses long-term data from the Isle Royale Wolf-Moose Project conducted by scientists at Michigan Tech. When you open the DRS, lick the first dataset (Isle Royale wolves and moose). On the right, under Saved tasks, find the example task Wolves and Moose and click Open.
 
 ## See it as a student
 
