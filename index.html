@@ -280,6 +280,10 @@ table.grid th.sorted .sa{color:var(--x)}
 .anonote .iconb{flex:0 0 auto;order:2}
 .graphtray{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:.45rem}
 .gtile{border:1px solid var(--line);background:var(--panel);padding:.3rem;min-width:0}
+.gfinds{margin-top:.3rem;display:flex;flex-direction:column;gap:.3rem}
+.gfind{border-top:1px solid var(--rule);padding-top:.3rem;font-size:.74rem;line-height:1.3}
+.gfind .gftext{overflow-wrap:anywhere}
+.gfind .btn{margin-top:.2rem}
 .gtile .btn{font-size:.72rem;padding:.2rem .4rem;width:100%}
 .brief.wide{max-width:none}
 .partgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:.45rem;margin-top:.5rem}
@@ -358,12 +362,12 @@ table.grid th.sorted .sa{color:var(--x)}
 .storyhead{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:0 0 .6rem}
 .storyhead .pagenav{margin:0}
 .storyhead > .btn{margin-left:auto}
-.storytop.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.storytop.two{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
 .storytop{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);
   gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:.8rem}
 .storytop > section{background:var(--panel);padding:.7rem .8rem;min-width:0;
   max-height:min(36vh,360px);overflow:auto}
-.storytop .graphtray{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+.storytop .graphtray{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
 .storytop .planner{border:0;background:none;padding:0;margin:0}
 .storytop .partgrid{grid-template-columns:minmax(0,1fr);gap:.3rem}
 @media(max-width:900px){.storytop{grid-template-columns:minmax(0,1fr)}
@@ -383,6 +387,16 @@ table.grid th.sorted .sa{color:var(--x)}
   padding:calc(.6rem + env(safe-area-inset-top,0px)) .9rem calc(.6rem + env(safe-area-inset-bottom,0px));
   display:flex;flex-direction:column;overflow:auto}
 .storycanvas.focus .boardwrap{flex:1 0 320px;height:auto}
+.storycanvas.focus .cvhead{padding-right:8.5rem}
+.storycanvas.focus .cvbody{display:flex;gap:.6rem;flex:1 1 auto;min-height:0}
+.storycanvas.focus .cvbody > .boardwrap{flex:1 1 auto;min-width:0;min-height:0;height:auto}
+.focustray{flex:0 0 238px;min-width:0;overflow:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;background:var(--panel);border:1px solid var(--rule);padding:.5rem .55rem}
+.focustray .graphtray{grid-template-columns:minmax(0,1fr)}
+.exitfocus{position:absolute;top:calc(.55rem + env(safe-area-inset-top,0px));right:.9rem;z-index:3}
+@media(max-width:760px){
+  .storycanvas.focus .cvbody{flex-direction:column}
+  .focustray{flex:0 0 auto;max-height:32vh}}
 body:has(.storycanvas.focus){overflow:hidden}
 .sbedge-r{position:absolute;top:26px;right:-4px;bottom:16px;width:9px;z-index:8;cursor:ew-resize;touch-action:none}
 .sbedge-b{position:absolute;left:10px;right:16px;bottom:-4px;height:9px;z-index:8;cursor:ns-resize;touch-action:none}
@@ -476,7 +490,12 @@ textarea.locked{background:var(--paper-2);color:var(--muted)}
 .upload{border:1px dashed var(--line);padding:1rem;background:var(--paper-2)}
 
 /* ---------- stage tabs ---------- */
-.stages{display:flex;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:1rem;overflow-x:auto}
+/* the four stage names stay under the top bar as the page scrolls, so a
+   student at the foot of a long page can still see which stage they are in.
+   Nothing else changes: the same tabs, in the same place, doing the same. */
+.stages{display:flex;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:1rem;
+  overflow-x:auto;position:sticky;top:var(--toph,3.5rem);z-index:30;
+  box-shadow:0 2px 6px rgba(0,0,0,.07)}
 .stage{flex:1;min-width:150px;background:var(--panel);border:0;padding:.6rem .7rem;text-align:left;cursor:pointer;font:inherit;color:inherit;border-bottom:3px solid transparent}
 .stage:hover{background:var(--paper-2)}
 .stage[aria-current="true"]{border-bottom-color:var(--x);background:var(--paper-2)}
@@ -505,6 +524,13 @@ textarea.locked{background:var(--paper-2);color:var(--muted)}
 @media(max-width:760px){.work,.work.notray,.work.noitem{grid-template-columns:minmax(0,1fr)}
   .work > .tray{grid-column:auto}}
 .tray h3,.itemcol h3{font-size:.95rem;margin-bottom:.5rem}
+.work > section > .stick{position:sticky;top:calc(var(--toph,3.5rem) + var(--stageh,0px) + .6rem);
+  max-height:calc(100vh - var(--toph,3.5rem) - var(--stageh,0px) - 5.2rem);overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior:contain;scrollbar-width:thin;margin:-4px;padding:4px}
+/* where the variable tray spans the top of the workspace, or everything is
+   stacked on a phone, holding a panel still would only cover the work */
+@media(max-width:900px){.work:not(.noitem) > .tray > .stick{position:static;max-height:none;overflow:visible}}
+@media(max-width:760px){.work > section > .stick{position:static;max-height:none;overflow:visible}}
 .chip{
   display:flex;align-items:center;gap:.45rem;width:100%;text-align:left;
   background:var(--paper-2);border:1px solid var(--line);border-radius:4px;
@@ -775,6 +801,9 @@ button.gk.on{background:var(--x);color:#fff}
 /* extraction: the table you build */
 .tablebox{border:1px dashed var(--line);padding:.55rem;margin-top:.7rem;background:var(--paper-2);
   transition:background .12s,border-color .12s}
+.tablebox .scroll-x{overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.tablebox .scroll-x table.grid th{position:sticky;top:0;z-index:3;background:var(--paper-2);
+  box-shadow:inset 0 1px 0 var(--line),inset 0 -1px 0 var(--line)}
 .tablebox.hot{border-color:var(--x);border-style:solid;background:var(--panel)}
 .tabcap{font-size:.74rem;color:var(--muted);margin-bottom:.35rem;letter-spacing:.02em}
 .dropempty{font-size:.85rem;color:var(--muted);padding:1.2rem .6rem;text-align:center;line-height:1.5}
@@ -827,6 +856,7 @@ textarea.aidraft{border-left:4px solid var(--y)}
 .two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
 .two > section{background:var(--panel);padding:1rem;min-width:0}
 @media(max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.finishbox{border:1px solid var(--line);background:var(--paper-2);padding:.8rem .9rem;margin-top:1rem}
 .tasklist{list-style:none;margin:0;padding:0;font-size:.85rem}
 .tasklist li{border:1px solid var(--line);padding:.5rem;margin-bottom:.4rem;display:flex;gap:.5rem;align-items:flex-start}
 .tasklist li .g{flex:1;min-width:0}
@@ -1953,6 +1983,8 @@ function render(){
      come back later to a graph still covered in rings */
   if(!stay) state.reads={};
   const y=window.scrollY;
+  /* the side panels scroll on their own, so their places are kept too */
+  const sticks=[...main.querySelectorAll('.stick')].map(n=>n.scrollTop);
   const act=document.activeElement;
   const focus=(stay&&act&&main.contains(act)&&/^(INPUT|TEXTAREA)$/.test(act.tagName))
     ? {path:nodePath(act),start:act.selectionStart,end:act.selectionEnd} : null;
@@ -1973,6 +2005,7 @@ function render(){
 
   if(stay){
     window.scrollTo({top:y});
+    main.querySelectorAll('.stick').forEach((n,i)=>{ if(sticks[i]) n.scrollTop=sticks[i]; });
     if(focus){
       const n=nodeAt(focus.path);
       if(n&&/^(INPUT|TEXTAREA)$/.test(n.tagName)){
@@ -1984,6 +2017,10 @@ function render(){
     window.scrollTo({top:0});
   }
   lastPlace=place;
+  /* the stage tabs are redrawn with the page, so what sits under them is
+     measured again before the sticky panels are placed */
+  setTops();
+  requestAnimationFrame(()=>{ setTops(); fitTableBox(); });
   if(state.view==='vocab'&&state.vocabFocus){
     const id=state.vocabFocus; state.vocabFocus=null;
     requestAnimationFrame(()=>{
@@ -1994,6 +2031,21 @@ function render(){
   }
 }
 /* where a node sits in the tree, as child indexes down from main */
+/* the sticky side panels sit just under the top bar and the stage tabs,
+   whose heights change when they wrap on a narrower window */
+let setTops=()=>{};
+{
+  const tb=document.querySelector('.topbar');
+  setTops=()=>{
+    const r=document.documentElement.style;
+    if(tb) r.setProperty('--toph',tb.getBoundingClientRect().height+'px');
+    const st=document.querySelector('.stages');
+    r.setProperty('--stageh',(st?st.getBoundingClientRect().height:0)+'px');
+  };
+  setTops();
+  if(tb&&window.ResizeObserver) new ResizeObserver(setTops).observe(tb);
+  window.addEventListener('resize',setTops);
+}
 function nodePath(n){
   const out=[];
   while(n&&n!==main){ out.unshift([...n.parentNode.childNodes].indexOf(n)); n=n.parentNode; }
@@ -2245,7 +2297,16 @@ function workLayout(opts){
   else if(opts.noItem) w.append(tray,surf);
   else w.append(tray,surf,item);
   main.appendChild(w);
-  return {tray,surf,item};
+  /* Teachers asked for the side panels to stay beside the work: a student at
+     the foot of a long graph column should not have to scroll back up for a
+     variable or a question. Each side panel's content sits in a sticky inner
+     box, so the panel itself still stretches the full height of the row and
+     the ruled edges between columns stay unbroken. A side panel taller than
+     the screen scrolls inside itself; it stops a little short of the foot of
+     the window so that, at the very end of the page, it is not pushed up
+     under the top bar by the space left below the workspace. */
+  const stick=sec=>{ const d=el('div','stick'); sec.appendChild(d); return d; };
+  return {tray:stick(tray),surf,item:stick(item)};
 }
 
 /* ---------- item + response column ---------- */
@@ -3520,7 +3581,13 @@ function paneExtractionB(p){
     e.textContent=txt(k); surf.appendChild(e);
   });
 
-  surf.appendChild(recordTable(p,tv));
+  /* Teachers asked for this: a student filling in the foot of a long table
+     should not have to scroll back up to see the data web. The table takes
+     what is left of the window and scrolls inside itself, with the variable
+     names held at the top of it. */
+  const tb=recordTable(p,tv);
+  surf.appendChild(tb);
+  requestAnimationFrame(fitTableBox);
 
   const tabJobs=exTableJob(p,tv);
   jobPanel(item,tabJobs,'exTabPart',
@@ -3529,11 +3596,26 @@ function paneExtractionB(p){
   teacherAsk(item,'extraction',{ai:'Extraction',step:'extraction'},genericDone(tabJobs));
 }
 
+/* the height is measured rather than guessed, because what sits above the
+   table changes: the data web strip, the notes, and the pinned stage tabs */
+function fitTableBox(){
+  const b=document.querySelector('.tablebox .scroll-x');
+  if(!b) return;
+  b.style.maxHeight='';
+  const r=b.getBoundingClientRect();
+  const room=Math.min(window.innerHeight-r.top-18,window.innerHeight-120);
+  b.style.maxHeight=Math.max(200,room)+'px';
+}
+window.addEventListener('resize',fitTableBox);
 function webStrip(p,cur,tv){
   const strip=el('div','strip');
   // a value tapped in the table: the web holding it comes forward, its neighbours step back
   if(state.tlink&&state.tlink.row===cur) strip.classList.add('linked');
-  const SPAN=3, PX=[300,148,94,62];
+  /* the webs are sized to the window as well as to the strip: on a short
+     screen a smaller web leaves room for the table underneath it, which is
+     what a student is scrolling while they build */
+  const base=Math.max(200,Math.min(300,Math.round(window.innerHeight*0.33)));
+  const SPAN=3, PX=[base,Math.round(base*0.49),Math.round(base*0.31),Math.round(base*0.21)];
   for(let d=-SPAN;d<=SPAN;d++){
     const i=cur+d, dist=Math.abs(d);
     const slot=el('div','slot'+(d===0?' focus':''));
@@ -4773,7 +4855,8 @@ function findSaid(v,opts){
     const row=el('div','frow');
     const lab=el('div','flab');
     const many=f.host[0]==='p'?cardViz(f.host).length:0;
-    lab.textContent=findName(f)+(many?' \u00b7 from a panel of '+many+' graphs':'');
+    lab.textContent=findName(f)+(many?' \u00b7 from a panel of '+many+' graphs':'')
+      +(findLate(f)?' \u00b7 noticed while explaining':'');
     row.appendChild(lab);
     const tx=el('div','fsaid'); tx.textContent=(f.text||'').trim(); row.appendChild(tx);
     /* on the Interpretation page the explanation is written here, under the
@@ -4794,9 +4877,14 @@ function findSaid(v,opts){
 }
 /* ---------- the strip under a card ----------
    the question is asked of this card, and answered under it */
-function findStrip(p,host){
+function findStrip(p,host,opts){
+  opts=opts||{};
   const w=el('div','fstrip');
-  const mine=findsFor(host);
+  const all=findsFor(host);
+  /* on the Interpretation page what is already written is shown just above,
+     with its explanation beside it, so this strip carries only the one being
+     written and the offer of a new one */
+  const mine=opts.newOnly?all.filter(f=>state.findAt===f.id):all;
   mine.forEach(f=>{
     const open=state.findAt===f.id;
     const row=el('div','frow'+(open?' on':''));
@@ -4855,7 +4943,7 @@ function findStrip(p,host){
   if(state.findAt) return w;
   const ask=el('div','row fask');
   const q=el('span','tiny');
-  q.textContent=mine.length?'Anything else here?':'Do you see anything here?';
+  q.textContent=all.length?'Anything else here?':'Do you see anything here?';
   ask.appendChild(q);
   FIND_KINDS.forEach(g=>{
     const b=btn(g.nm,()=>startFind(host,g.k),'ghost');
@@ -4864,7 +4952,7 @@ function findStrip(p,host){
   });
   /* saying there is nothing in a graph is an answer too, and it folds the
      graph away rather than throwing it out, so the looking stays on record */
-  if(!mine.length&&host[0]==='v'){
+  if(!all.length&&host[0]==='v'&&!opts.newOnly){
     const v=state.vizzes.find(z=>z.id===+host.slice(1));
     if(v){
       const b=btn('Nothing here',()=>foldViz(v,true),'ghost');
@@ -6992,11 +7080,19 @@ function cardViz(host){
 }
 function findsFor(host){ return (state.finds||[]).filter(f=>f.host===host); }
 function findLive(){
-  return state.view==='student'&&state.stage==='identification'&&idStepNow()===5&&!!state.findAt;
+  if(state.view!=='student'||!state.findAt) return false;
+  /* step 5 is where findings start, but students often see something new
+     while they are explaining, so the same marking works there too */
+  if(state.stage==='interpretation') return true;
+  return state.stage==='identification'&&idStepNow()===5;
 }
+/* noticed while explaining rather than while describing */
+function findLate(f){ return f&&f.made==='interpretation'; }
 function findOpen(){ return (state.finds||[]).find(f=>f.id===state.findAt)||null; }
 function startFind(host,k,sub){
-  const f={id:state.findSeq++,host,kind:k,sub:sub||null,text:'',marks:[]};
+  /* which page it was noticed on: while describing the graph, or later while
+     explaining it. The student never sees a difference; the record does. */
+  const f={id:state.findSeq++,host,kind:k,sub:sub||null,text:'',marks:[],made:state.stage};
   state.finds.push(f); state.findAt=f.id; render();
 }
 function dropFind(id){
@@ -7488,7 +7584,12 @@ function paneInterpretation(p){
   if(state.route==='menu') surf.appendChild(menuRoute(p,taskVars()));
   fingerHint(surf);
   buildCanvas(surf,p,'No graph yet. Drag a variable from the left onto this space to build one.',{
-    after:(node,v)=>{ const w=findSaid(v,{why:true}); if(w) node.appendChild(w); }
+    after:(node,v)=>{
+      const w=findSaid(v,{why:true}); if(w) node.appendChild(w);
+      /* something new can be noticed here as well, and it is described and
+         marked exactly as it was in step 5 */
+      if(!v.none) node.appendChild(findStrip(p,'v'+v.id,{newOnly:true}));
+    }
   });
 
   interpTodo(item,p);
@@ -7855,6 +7956,28 @@ function chartName(p,v){
        : `${p.cols[v.xi]} and ${p.cols[v.yi]}`;
 }
 
+/* which findings hang under which graph in the tray. A finding made on a
+   panel belongs to the whole panel, so it hangs under the first of its
+   graphs and brings the others with it. */
+function storyFinds(v){
+  return (state.finds||[]).filter(f=>{
+    if(!(f.text||'').trim()) return false;
+    const ids=cardViz(f.host).filter(id=>state.vizzes.some(z=>z.id===id));
+    return ids.length>0&&ids[0]===v.id;
+  });
+}
+function addFindBlock(s,f){
+  /* every graph on the finding's card comes with it, each as its own card,
+     so a panel arrives in the story as the picture it was */
+  const ids=cardViz(f.host).filter(id=>state.vizzes.some(z=>z.id===id));
+  const why=(state.responses['why.'+f.id]||'').trim();
+  const nb=newBlock(s,ids.length?ids[0]:null);
+  nb.text=(f.text||'').trim()+(why?'\n\n'+why:'');
+  s.blocks.push(nb);
+  ids.slice(1).forEach(id=>s.blocks.push(newBlock(s,id)));
+  state.boardScroll=Math.max(0,nb.y-24);
+  render();
+}
 function paneStory(p){
   const _task=activeTask();
   const enabled=STORY_FAMILIES.filter(f=>storyShown(_task,f.k));
@@ -7917,6 +8040,7 @@ function paneStory(p){
       (state.starred[b.id]?1:0)-(state.starred[a.id]?1:0));
     ordered.forEach(v=>{
       const card=el('div','gtile');
+      const mine=storyFinds(v);
       const nm=el('div','gname');
       nm.textContent=(state.starred[v.id]?'\u2605 ':'')+shorten(chartName(p,v),32);
       const fig=el('div','gfig'); fig.appendChild(fluidChart(p,v));
@@ -7928,6 +8052,27 @@ function paneStory(p){
         state.boardScroll=Math.max(0,nb.y-24); render();
       },'ghost'));
       card.append(nm,fig,row);
+      /* everything the student already said about this graph travels with
+         it: the sentence from Identification and the explanation from
+         Interpretation. Editing the card in the story leaves those
+         originals as they were. */
+      if(mine.length){
+        const fb=el('div','gfinds');
+        mine.forEach(f=>{
+          const r=el('div','gfind');
+          const t=el('div','gftext');
+          t.innerHTML='<b>'+esc(findName(f))+'</b> '+esc((f.text||'').trim());
+          r.appendChild(t);
+          const why=(state.responses['why.'+f.id]||'').trim();
+          const w=el('div','tiny muted');
+          w.textContent=why||'No explanation written yet.';
+          r.appendChild(w);
+          const ab=btn('Add to story',()=>addFindBlock(s,f),'ghost');
+          r.appendChild(ab);
+          fb.appendChild(r);
+        });
+        card.appendChild(fb);
+      }
       dragFromStory(fig,chartName(p,v),(bid,at)=>{
         if(bid){
           const b=s.blocks.find(x=>x.bid===bid);
@@ -7940,8 +8085,26 @@ function paneStory(p){
     });
     tray.appendChild(box);
     const n=el('p','tiny muted'); n.style.marginTop='.4rem';
-    n.textContent='Drag a graph down onto the canvas, or press Add to story.';
+    n.textContent='Drag a graph down onto the canvas, or press Add to story. What you found is under the graph you found it on.';
     tray.appendChild(n);
+    /* a finding whose graphs were all deleted still belongs to the student,
+       so it is kept here rather than quietly dropped */
+    const lost=(state.finds||[]).filter(f=>(f.text||'').trim())
+      .filter(f=>!cardViz(f.host).some(id=>state.vizzes.some(z=>z.id===id)));
+    if(lost.length){
+      const lb=el('div','gfinds'); lb.style.marginTop='.5rem';
+      const lh=el('p','tiny muted'); lh.style.margin='0 0 .25rem';
+      lh.textContent='Found on a graph you deleted:';
+      tray.append(lh,lb);
+      lost.forEach(f=>{
+        const r=el('div','gfind');
+        const t=el('div','gftext');
+        t.innerHTML='<b>'+esc(findName(f))+'</b> '+esc((f.text||'').trim());
+        r.appendChild(t);
+        r.appendChild(btn('Add to story',()=>addFindBlock(s,f),'ghost'));
+        lb.appendChild(r);
+      });
+    }
   }
 
   /* ---- the canvas ---- */
@@ -7950,62 +8113,21 @@ function paneStory(p){
   const ch=el('div','row cvhead');
   const hd=hh('Your story'); hd.style.margin='0';
   ch.appendChild(hd);
+  /* Only the tools for building the story sit here. Saving and printing
+     wait in a box at the foot of the page, so a student writing is not
+     looking at buttons meant for the end. */
   const tools=el('div','row');
+  if(!state.storyFocus){
+    const fb=btn('Focus',()=>{state.storyFocus=true;render();},'ghost');
+    fb.title='Give the canvas the whole window';
+    tools.appendChild(fb);
+  }
   tools.appendChild(btn('Add a text block',()=>{
     s.blocks.push(newBlock(s,null));render();
   },'ghost'));
-  /* what the student noticed in Identification and explained in
-     Interpretation comes in as a card already written, so the story is
-     built out of their own earlier work rather than typed again */
-  { const named=(state.finds||[]).filter(f=>(f.text||'').trim());
-    if(named.length){
-      tools.appendChild(btn('Bring in what you found',()=>{
-        state.findPick=!state.findPick; render();
-      },'ghost'));
-    }
-  }
   tools.appendChild(btn('Build a new graph',()=>{
     state.viewPanel=(state.viewPanel&&state.viewPanel.isNew)?null:{isNew:true,draft:null};render();
   },'ghost'));
-  tools.appendChild(btn('Save as a web page',saveStoryFile,'ghost'));
-  const findRow=el('div','findlist');
-  if(state.findPick){
-    (state.finds||[]).filter(f=>(f.text||'').trim()).forEach(f=>{
-      const why=(state.responses['why.'+f.id]||'').trim();
-      const row=el('div','findrow');
-      const t=el('div');
-      t.innerHTML='<b>'+esc(findName(f))+'</b> <span class="tiny muted">'+esc((f.text||'').trim())
-        +(why?'':' \u00b7 no explanation written yet')+'</span>';
-      row.appendChild(t);
-      row.appendChild(btn('Add to story',()=>{
-        /* every graph on the finding's card comes with it, each as its own
-           card, so a panel arrives in the story as the picture it was */
-        const ids=cardViz(f.host).filter(id=>state.vizzes.some(z=>z.id===id));
-        const first=ids.length?ids[0]:null;
-        const nb=newBlock(s,first);
-        nb.text=(f.text||'').trim()+(why?'\n\n'+why:'');
-        s.blocks.push(nb);
-        ids.slice(1).forEach(id=>s.blocks.push(newBlock(s,id)));
-        state.findPick=false; render();
-      },'ghost'));
-      findRow.appendChild(row);
-    });
-  }
-  /* a local copy can go straight to the printer; inside claude.ai the frame
-     is not allowed to, so the same document is saved as a file instead */
-  const pb=btn(canPrint()?'Print or save as PDF':'Save this story as a file',
-    canPrint()?printStory:saveStoryFile,'ghost');
-  pb.title=canPrint()?'Opens your printer window. Choose Save as PDF to keep a copy.'
-                     :'Saves this story as a page you can open, read and print to PDF.';
-  tools.appendChild(pb);
-  const wb=btn('All my work',canPrint()?printWork:saveWorkFile,'ghost');
-  wb.title='Every answer you wrote and every graph you built, on every page, as one document.'+
-    (canPrint()?' Opens your printer window.':' It is saved as a file you can open and print to PDF.');
-  tools.appendChild(wb);
-  const fb=btn(state.storyFocus?'Exit focus':'Focus',()=>{state.storyFocus=!state.storyFocus;render();},
-    state.storyFocus?'':'ghost');
-  fb.title=state.storyFocus?'Back to the full page (Esc)':'Give the canvas the whole window';
-  tools.appendChild(fb);
   ch.appendChild(tools);
   cv.appendChild(ch);
 
@@ -8014,8 +8136,6 @@ function paneStory(p){
   ti.placeholder='Give your story a title';
   ti.value=s.title; ti.oninput=()=>{s.title=ti.value;};
   ch.insertBefore(ti,tools);
-
-  if(findRow.children.length) cv.appendChild(findRow);
 
   const pick=el('div','row cvtools');
   cv.appendChild(pick);
@@ -8091,9 +8211,28 @@ function paneStory(p){
   const wrap=el('div','boardwrap'); wrap.id='boardwrap';
   wrap.appendChild(board);
   wrap.addEventListener('scroll',()=>{state.boardScroll=wrap.scrollTop;},{passive:true});
-  cv.appendChild(wrap);
+  if(state.storyFocus){
+    /* Focus used to hide everything but the canvas, and My graphs went with
+       it \u2014 which is where the graphs and what was found on them now live.
+       So in Focus it moves to a narrow column beside the canvas, and only
+       the task questions are put away. */
+    const body=el('div','cvbody');
+    tray.classList.add('focustray');
+    body.append(tray,wrap);
+    cv.appendChild(body);
+    /* and one plain way back out, in the corner where a student looks for
+       it, rather than a word in a row of other buttons */
+    const xb=btn('\u2715 Exit focus',()=>{state.storyFocus=false;render();});
+    xb.classList.add('exitfocus');
+    xb.title='Back to the full page (Esc)';
+    cv.appendChild(xb);
+  }else{
+    cv.appendChild(wrap);
+  }
   surf.appendChild(cv);
   requestAnimationFrame(()=>{ paintBoard(s); wrap.scrollTop=state.boardScroll||0; });
+
+  if(!state.storyFocus) surf.appendChild(finishBox());
 
   if(state.zoomViz!==null&&state.zoomViz!==undefined){
     const v=state.vizzes.find(x=>x.id===state.zoomViz);
@@ -8101,6 +8240,29 @@ function paneStory(p){
   }
 
   itemCol(item,storyStageKey(),STORY_DEFAULT_STEM[state.story.fam]);
+}
+
+/* Two documents, at the end of the story and nowhere else: the report on
+   its own, to hand in, and everything the student did, which is what a
+   teacher reads. Inside claude.ai the frame cannot reach the printer, so
+   the same two documents are saved as files instead. */
+function finishBox(){
+  const box=el('section','finishbox');
+  const h=hh('When you have finished'); h.style.margin='0 0 .25rem';
+  box.appendChild(h);
+  const n=el('p','small muted'); n.style.margin='0 0 .5rem';
+  n.textContent=canPrint()
+    ? 'Print your story on its own to hand it in. Print all your work to show everything you did, on every page.'
+    : 'Save your story on its own to hand it in. Save all your work to show everything you did, on every page.';
+  box.appendChild(n);
+  const row=el('div','row');
+  const sb=btn(canPrint()?'Print my story':'Save my story',canPrint()?printStory:saveStoryFile);
+  sb.title='Your title, your cards and your graphs, in the order you put them.';
+  const wb=btn(canPrint()?'Print all my work':'Save all my work',canPrint()?printWork:saveWorkFile,'ghost');
+  wb.title='Every answer you wrote, every graph you built and this story, as one document.';
+  row.append(sb,wb);
+  box.appendChild(row);
+  return box;
 }
 
 /* ============================================================
@@ -9155,7 +9317,7 @@ function workSections(p){
   /* what the student found, each with the explanation written for it */
   {
     const items=(state.finds||[]).filter(f=>(f.text||'').trim()).map(f=>({
-      q:findName(f)+' \u2014 '+(f.text||'').trim()+
+      q:findName(f)+(findLate(f)?' (noticed while explaining)':'')+' \u2014 '+(f.text||'').trim()+
         ((f.marks||[]).length?' (marked: '+f.marks.map(m=>m.text).join('; ')+')':''),
       a:ans('why.'+f.id)||'(no explanation written yet)'}));
     if(items.length) out.push({t:'What you found',items});
@@ -9219,6 +9381,16 @@ function workDoc(p){
     doc.appendChild(w);
   }
 
+  /* the report itself, so this one document really does hold everything:
+     every answer, every graph, and the story built out of them */
+  if((storyState().blocks||[]).length){
+    const w=el('div','wk-sec');
+    const t=document.createElement('h2'); t.textContent='Your data story'; w.appendChild(t);
+    try{ w.appendChild(storyDoc(p)); }
+    catch(e){ const m=el('p','sd-missing'); m.textContent='The story could not be drawn here.'; w.appendChild(m); }
+    doc.appendChild(w);
+  }
+
   const f=el('p','sd-foot');
   f.textContent='Made with DRS \u00b7 '+new Date().toLocaleDateString();
   doc.appendChild(f);
@@ -9234,6 +9406,8 @@ const WORK_DOC_CSS=`
   .wk-q{font-family:Newsreader,Georgia,serif;font-size:1rem;line-height:1.35;
     margin:0 0 .25rem}
   .workdoc .sd-text{border-left:3px solid var(--x);padding-left:.7rem;margin:0}
+  .workdoc .storydoc{margin:0}
+  .workdoc .storydoc h1{font-size:1.3rem;margin:0 0 .2rem}
 `;
 (function injectWorkDocCSS(){
   const st=document.createElement('style');
