@@ -10,7 +10,8 @@ DRS is in early development. It is being built with teachers and families, with 
 
 [▶ Open Data Reasoning Studio](https://huijin5859.github.io/data-reasoning-studio/): no account or installation needed. Currently, live AI responses are available only to Georgia Southern University accounts. 
 
-Try it in 10 minutes: the Wolves and Moose task
+Try it in 10 minutes: the Wolves and Moose task 
+Click the first dataset, Isle Royale wolves and moose. On the right, under Saved tasks, find the example task Wolves and Moose and click Open.
 
 The quickest way to see DRS is to work through the built-in example task, Wolves and Moose. It uses long-term data from the Isle Royale Wolf-Moose Project conducted by scientists at Michigan Tech.
 
