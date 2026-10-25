@@ -1185,11 +1185,11 @@ const VOCAB=[
    },
    {
     "id": "storytelling",
-    "t": "Storytelling",
+    "t": "Synthesis",
     "m": [
-     "storytelling"
+     "synthesis"
     ],
-    "d": "Storytelling is the process of building a data story, choosing your single point, selecting the graphs and findings that serve it, and arranging them so the idea lands for your audience. So storytelling is the activity, and a data story is what it produces."
+    "d": "Synthesis is the process of building a data story, choosing your single point, selecting the graphs and findings that serve it, and arranging them so the idea lands for your audience. So synthesis is the activity, and a data story is what it produces."
    }
   ]
  },
@@ -1675,7 +1675,7 @@ const state={
   responses:{},             // stage -> text
   toss:{mode:null,texts:{},picked:null,loading:false},
   story:{fam:'method',by:{}},
-  findPick:false,          // Storytelling: the list of findings is open
+  findPick:false,          // Synthesis: the list of findings is open
   task:null,                // active teacher task
   tasks:[],
   custom:{}                 // uploaded datasets
@@ -2236,7 +2236,7 @@ const STAGES=[
   {k:'extraction',nm:'Extraction',de:'What did the scientists measure, and how well?'},
   {k:'identification',nm:'Identification',de:'What patterns and surprises are in the data?'},
   {k:'interpretation',nm:'Interpretation',de:'What could explain what you found?'},
-  {k:'storytelling',nm:'Storytelling',de:'What is the story, and who should hear it?'}
+  {k:'storytelling',nm:'Synthesis',de:'What is the story, and who should hear it?'}
 ];
 function resetWork(){
   state.vizzes=[];state.vizSeq=1;state.observedRows=[];state.observedVars=[];
@@ -2345,7 +2345,7 @@ const TEXTS=[
    'Move a variable from the left onto the canvas to build a one-variable distribution. Put two graphs facing the same way side by side to compare them. Turn one graph on its side first, then drop it onto an upright graph to build a scatterplot. From there you can add a third variable as color, or combine two scatterplots to compare them. Keep the graphs you need for your story, and close the rest.'],
   ['guide.interpretation','Banner \u2014 Interpretation',
    'Explain the patterns and anomalies you found. Use your graphs to answer the questions.'],
-  ['guide.storytelling','Banner \u2014 Storytelling',
+  ['guide.storytelling','Banner \u2014 Synthesis',
    'Build a *Methodology story* (how you figured it out) or a *Findings story* (what you found out), or both. Each one brings together one or more of your graphs and a note or two that make your point. Use a graph as it is, show it a different way, or build a new one.'],
   ['bg.ask','Instruction above the background',
    'Drag each item from the picture onto the data web. Each one you place reveals a specific variable the scientists measured.'],
@@ -5458,7 +5458,7 @@ function annoCount(v){
   return (a.paths||[]).length+(a.notes||[]).length+(a.lines||[]).length+(a.areas||[]).length;
 }
 function chartTool(){ return state.chartTool||'point'; }
-/* marking up charts belongs to Storytelling: off while a student is building
+/* marking up charts belongs to Synthesis: off while a student is building
    (Identification) or answering questions (Interpretation) */
 function annoLive(){ return !(state.view==='student'&&(state.stage==='identification'||state.stage==='interpretation')); }
 function plotOf(svg){
@@ -6227,7 +6227,7 @@ function renderViz(p,v){
     const st=document.createElement('button');
     st.type='button'; st.className='iconb star'+(state.starred[v.id]?' on':'');
     st.textContent=state.starred[v.id]?'\u2605 in my story':'\u2606 keep for my story';
-    st.title='Graphs you keep are shown first in Storytelling. Nothing is deleted either way.';
+    st.title='Graphs you keep are shown first in Synthesis. Nothing is deleted either way.';
     st.onclick=()=>{ state.starred[v.id]=!state.starred[v.id]; render(); };
     head.appendChild(st);
   }
@@ -6991,7 +6991,7 @@ function zoomButtons(v){
    or group and how many values are in it. This is a reading aid, not a mark
    the student makes - it shows one line under that graph and is gone as soon
    as they tap another mark or the same one again, and it goes into no
-   export. Where marking up a chart is allowed (Storytelling), a tap still
+   export. Where marking up a chart is allowed (Synthesis), a tap still
    marks the point, as it always did. */
 /* ---------- what the student noticed ----------
    A finding is the object the rest of the tool hangs on: a kind, a name in
@@ -7066,10 +7066,10 @@ function stageShut(k,p){
       ' things in step 5 of Identification. You have '+findDone()+' so far.';
   }
   if(k==='storytelling'){
-    if(!thirdStepDone(p)) return 'Storytelling opens once you have worked through the five steps of Identification.';
-    if(!findGoalMet()) return 'Storytelling opens once you have found '+findGoal()+
+    if(!thirdStepDone(p)) return 'Synthesis opens once you have worked through the five steps of Identification.';
+    if(!findGoalMet()) return 'Synthesis opens once you have found '+findGoal()+
       ' things in step 5 of Identification. You have '+findDone()+' so far.';
-    if(!interpDone(p)) return 'Storytelling opens once you have explained what you found and answered every question on the Interpretation page.';
+    if(!interpDone(p)) return 'Synthesis opens once you have explained what you found and answered every question on the Interpretation page.';
   }
   return '';
 }
@@ -7131,7 +7131,7 @@ function readOut(id,text){
   render();
 }
 /* a mark that is being read says so on the graph as well as under it:
-   same ring, same colour as a marked point in Storytelling */
+   same ring, same colour as a marked point in Synthesis */
 function readable(node,v,text){
   node.style.cursor='pointer';
   if(litMark(v.id,text)){
@@ -7573,7 +7573,7 @@ function paneInterpretation(p){
   /* Three panels, like Identification with the questions added: the
      variables on the left so a student can still build a chart to test an
      idea, their charts in the middle, and every question the teacher wrote
-     on the right. Marking up charts happens on the Storytelling page. */
+     on the right. Marking up charts happens on the Synthesis page. */
   const {tray,surf,item}=workLayout();
   const _t=activeTask();
   varTray(tray,p);
